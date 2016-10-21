@@ -1,3 +1,7 @@
+/**
+*
+*
+**/
 package codec
 
 import (
@@ -19,6 +23,7 @@ func UnWrapC2SData(originData string) (command, data, leftString string, err err
 	commandLengthIndex := strings.Index(originData, "\n")
 	if commandLengthIndex <= 0 || commandLengthIndex > len(originData) {
 		err = errors.New("command length is invalidate")
+		return
 	}
 	commandLengthStr := originData[:commandLengthIndex]
 	commandLength, confErr := strconv.Atoi(commandLengthStr)
@@ -54,14 +59,14 @@ func WrapS2CData(data string) (string, error) {
 		log.Fatalln(dataErr.Error())
 		return "", dataErr
 	}
-	return fmt.Sprintf("%d\n%s\n", len(data), string(dataBytes)), nil
+	return fmt.Sprintf("%d\n%s\n", len(dataBytes), string(dataBytes)), nil
 }
 
 //解封server->client
-func UnWrapS2CData(originData string) (data string, err error) {
+func UnWrapS2CData(originData string) (data, leftString string, err error) {
 	dataLengthIndex := strings.Index(originData, "\n")
 	if dataLengthIndex <= 0 || dataLengthIndex > len(originData) {
-		err = errors.New("data length is invalidate")
+		err = errors.New("dataLengthIndex length is invalidate")
 		return
 	}
 	dataLengthStr := originData[:dataLengthIndex]
@@ -75,6 +80,7 @@ func UnWrapS2CData(originData string) (data string, err error) {
 		return
 	}
 	data = originData[dataLengthIndex+1 : dataLengthIndex+1+dataLength]
+	leftString = originData[dataLengthIndex+1+dataLength+1:]
 	return
 }
 

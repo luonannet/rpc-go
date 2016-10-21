@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/burntsushi/toml"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 var (

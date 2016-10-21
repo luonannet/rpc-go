@@ -16,11 +16,3 @@ func (jc *JumeiConn) S2CSend(response string) (err error) {
 	jc.Conn.Write([]byte(response))
 	return
 }
-
-// func ServerSendData(conn net.Conn, response string) {
-// 	if len(response) == 0 {
-// 		return
-// 	}
-// 	codec.WrapS2CData(response)
-// 	conn.Write([]byte())
-// }

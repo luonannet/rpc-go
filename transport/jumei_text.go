@@ -5,7 +5,6 @@ import (
 	"log"
 	"net"
 	"rpc-go/codec"
-	"strconv"
 	"strings"
 )
 
@@ -40,30 +39,11 @@ func ReceiveData(conn net.Conn, dataChan chan JumeiTextRPC) (err error) {
 	dealdata:
 		dataString := string(dataBox)
 		sepNumber := strings.Count(dataString, "\n")
-		if sepNumber < 4 {
-			//如果数据不够
-			commandLengthIndex := strings.Index(dataString, "\n")
-			if commandLengthIndex < 1 {
-				log.Println("脏数据1:", commandLengthIndex)
-				dataBox = dataBox[0:0]
-				conn.Close()
-				continue
-			}
-			commandLength, comandLengthErr := strconv.Atoi(dataString[:commandLengthIndex])
-			if comandLengthErr != nil || commandLength > 8000 {
-				//如果收到的数据前面几个字符不是规定格式的，那么说明是脏数据。丢弃
-				log.Println("脏数据2:", comandLengthErr, commandLength)
-				dataBox = dataBox[0:0]
-				conn.Close()
-				continue
-			}
-			//如果格式是对的，只是长度不够，那么继续等待
-			continue
-		} else if sepNumber >= 4 {
+		if sepNumber >= 4 {
 			command, data, leftstring, unWrapErr := codec.UnWrapC2SData(dataString)
 			if unWrapErr != nil {
 				// 如果解包出现问题，说明数据已经乱了。则丢掉之前的数据
-				log.Println("数据已经乱:", dataString, unWrapErr.Error())
+				log.Println("解码出错:", dataString, unWrapErr.Error())
 				dataBox = dataBox[0:0]
 				continue
 			}
