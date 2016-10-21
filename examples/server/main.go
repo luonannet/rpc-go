@@ -1,7 +1,7 @@
 package main
 
 import (
-	"rpc-go/server/rpc_methods"
+	"rpc-go/examples/server/rpc_methods"
 	"rpc-go/service"
 )
 
