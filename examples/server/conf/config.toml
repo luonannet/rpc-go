@@ -1,0 +1,10 @@
+[rpc_server]
+#rpc的名称,在同一个数据中心名字保持唯一
+service_name = "acs"
+#rpc服务器ip
+ip = "172.20.4.19"
+#端口
+port = ":9999"
+#最大连接数
+max_connection =500
+secret_key = "17aba3e431d211e68d73842b2b738d12" 

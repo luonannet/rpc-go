@@ -30,8 +30,9 @@ type RPCParam struct {
 }
 
 //RPC2ClientData
-type RPC2ClientData struct {
-	Data string `json:"data"`
+type S2CData struct {
+	Data  string `json:"data"`
+	Statu int    `json:"statu"`
 }
 
 func InitRpcData(class, method, params string) (result string, err error) {

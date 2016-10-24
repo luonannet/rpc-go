@@ -1,0 +1,30 @@
+heap profile: 1: 13568 [1: 13568] @ heap/1048576
+1: 13568 [1: 13568] @ 0x409064 0x407cb0 0x4837ba 0x46bba0 0x46776a 0x401375 0x42d5fb 0x45a3a1
+#	0x4837b9	time.init+0x3ad9	C:/Go/src/time/zoneinfo_abbrs_windows.go:120
+#	0x46bb9f	os.init+0x4f		C:/Go/src/os/types_windows.go:112
+#	0x467769	fmt.init+0x59		C:/Go/src/fmt/scan.go:1198
+#	0x401374	main.init+0x34		E:/goworkspace/src/rpc-go/examples/server/main.go:35
+#	0x42d5fa	runtime.main+0x1ba	C:/Go/src/runtime/proc.go:172
+
+
+# runtime.MemStats
+# Alloc = 120432
+# TotalAlloc = 174992
+# Sys = 4032760
+# Lookups = 9
+# Mallocs = 1283
+# Frees = 760
+# HeapAlloc = 120432
+# HeapSys = 983040
+# HeapIdle = 450560
+# HeapInuse = 532480
+# HeapReleased = 0
+# HeapObjects = 523
+# Stack = 65536 / 65536
+# MSpan = 8320 / 16384
+# MCache = 4672 / 16384
+# BuckHashSys = 1442310
+# NextGC = 4194304
+# PauseNs = [4000500 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+# NumGC = 1
+# DebugGC = false

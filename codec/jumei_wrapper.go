@@ -51,9 +51,11 @@ func UnWrapC2SData(originData string) (command, data, leftString string, err err
 }
 
 //封装server->client 成聚美rpc text格式
-func WrapS2CData(data string) (string, error) {
-	var s2cData RPC2ClientData
+func WrapS2CData(statu int, data string) (string, error) {
+
+	var s2cData S2CData
 	s2cData.Data = data
+	s2cData.Statu = statu
 	dataBytes, dataErr := json.Marshal(&s2cData)
 	if dataErr != nil {
 		log.Fatalln(dataErr.Error())
