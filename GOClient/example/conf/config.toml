@@ -1,0 +1,11 @@
+[rpc]
+[rpc.user]
+uri="tcp://172.20.4.19:9999" 
+user =""
+secret =""
+compressor ="GZ"
+[rpc.product]
+uri="tcp://172.20.4.19:9999" 
+user =""
+secret =""
+compressor ="GZ"
