@@ -1,34 +1,29 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"rpc-go/config"
-	_ "rpc-go/examples/server/rpc_methods"
+	"rpc-go/examples/server/rpc_methods" // 将rpc 的方法进行注册
 	"rpc-go/service"
-	_ "rpc-go/service/register"
-	"runtime"
-	"runtime/pprof"
-	"time"
+	"rpc-go/service/register"
 )
 
 func main() {
-	defer saveHeapProfile()
-	config.LoadConfig()
-	srvs := service.NewService()
-	srvs.Init("test.rpc.jumei.com", "tcp", "172.20.4.19:9999")
-	srvs.Run()
-
-}
-
-func saveHeapProfile() {
-	runtime.GC()
-	f, err := os.Create(fmt.Sprintf("server_%s.prof", time.Now().Format("2006_01_02_03_04_05")))
-
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+	//载入配置文件。默认地址在conf/config.toml
+	conf, err := config.LoadConfig("conf/config.toml")
 	if err != nil {
-		return
+		config.Logger.Error("load Config Error:", err.Error())
+		os.Exit(1)
 	}
-	defer f.Close()
-	//pprof.WriteHeapProfile(f)
-	pprof.Lookup("heap").WriteTo(f, 1)
+	defer config.Logger.Flush()
+	srvs := service.NewService(conf)
+	register.RegisterHandler("Example.RpcTest1Handler", rpc_methods.TestExample.RpcTest1Handler)
+	register.RegisterHandler("Example.SayHello", rpc_methods.TestExample.SayHello)
+	srvs.Run()
 }

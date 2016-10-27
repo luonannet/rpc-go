@@ -1,52 +1,76 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"rpc-go/codec"
 	"rpc-go/service/register"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
 func main() {
-	rpcServerAddress := "172.20.4.19:9999"
-	tcpAddr, err := net.ResolveTCPAddr("tcp", rpcServerAddress)
+	rpcServerAddress := flag.String("add", "172.20.4.19:9999", "the species we are studying")
+
+	tcpAddr, err := net.ResolveTCPAddr("tcp", *rpcServerAddress)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
 		os.Exit(1)
 	}
+	starttime = time.Now()
+	//启动多线程.每个线程循环测试
+	for i := 0; i < 50; i++ {
+		go startAnet(tcpAddr)
+	}
+	// sign := make(chan os.Signal, 0)
+	// signal.Notify(sign, os.Kill)
+	// <-sign
+	time.Sleep(time.Second * 60)
 
-	receiveChan := make(chan string, 0)
-	var totalNum int
-	starttime := time.Now()
+	fmt.Println(time.Now().Sub(starttime), "---", i)
+}
+func callTest() {
 
-	for totalNum < 50000 {
+}
+
+//用来计算服务器压力测试的开始时间
+var starttime time.Time
+
+//在指定时间内的 request 数
+var i int32
+
+func startAnet(tcpAddr *net.TCPAddr) {
+
+	for {
 		conn, err := net.DialTCP("tcp", nil, tcpAddr)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
-			os.Exit(1)
+			fmt.Println(time.Now().Sub(starttime), "---", i)
+			//	fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+			continue
+			//	os.Exit(1)
 		}
 
+		receiveChan := make(chan string, 0)
 		go receiveData(conn, receiveChan)
 
 		sender(conn)
-		receivedata := <-receiveChan
+		_ = <-receiveChan
 		closeConn(conn)
-		time.Sleep(time.Microsecond * 1)
-		totalNum++
-		fmt.Println(receivedata)
+		atomic.AddInt32(&i, 1)
+		//	time.Sleep(time.Microsecond * 1)
+		//fmt.Println(receivedata)
 		//	receivedata := <-receiveChan
 
 	}
-	fmt.Println(time.Now().Sub(starttime))
 }
+
 func sender(conn net.Conn) {
 	words := "hello world! 你好 中文"
-	dataString, err := codec.InitRpcData(register.RPC_Client_Prefix+"Example", "RpcTest1Handler", words)
+	dataString, err := codec.InitCallRPC(register.RPC_Client_Prefix+"Example", "RpcTest1Handler", words)
 	if err != nil {
 		fmt.Println("send err", err.Error())
 		return
@@ -68,11 +92,10 @@ func receiveData(conn net.Conn, receivechan chan string) (err error) {
 		size, err = conn.Read(readData)
 		if err != nil {
 			if err != io.EOF {
-				log.Println("not eof error:", err.Error())
+				fmt.Println("not eof error:", err.Error())
 				receivechan <- err.Error()
 				return
 			}
-			//log.Println("---readData:", string(readData))
 			// 此时 err == EOF 。
 			continue
 		}
@@ -85,10 +108,9 @@ func receiveData(conn net.Conn, receivechan chan string) (err error) {
 			data, leftstring, unWrapErr := codec.UnWrapS2CData(dataString)
 			if unWrapErr != nil {
 				// 如果解包出现问题，说明数据已经乱了。则丢掉之前的数据
-				log.Println("解码出错:", dataString, unWrapErr.Error())
+				unWrapErrStr := fmt.Sprintf("decode %s ,and error %s", dataString, unWrapErr.Error())
 				dataBox = dataBox[0:0]
-
-				receivechan <- "解码出错"
+				receivechan <- unWrapErrStr
 				return
 			}
 

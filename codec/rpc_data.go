@@ -8,7 +8,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"rpc-go/config"
 	"time"
 )
 
@@ -18,7 +17,7 @@ type RPCData struct {
 	Signature string `json:"signature"`
 }
 
-//RPCData rpc的data json数据
+//RPCParam rpc的data json数据
 type RPCParam struct {
 	Version   string      `json:"version"`
 	User      string      `json:"user"`
@@ -29,13 +28,14 @@ type RPCParam struct {
 	Params    interface{} `json:"params"`
 }
 
-//RPC2ClientData
+//S2CData 服务器端发往客户端的数据结构
 type S2CData struct {
 	Data  string `json:"data"`
 	Statu int    `json:"statu"`
 }
 
-func InitRpcData(class, method, params string) (result string, err error) {
+// InitCallRPC 客户端调用jmTextRPC 初始化数据
+func InitCallRPC(class, method, params string) (result string, err error) {
 	var rpcData RPCData
 	var rpcParam RPCParam
 	rpcParam.Version = "2.0"
@@ -54,7 +54,7 @@ func InitRpcData(class, method, params string) (result string, err error) {
 	mdtcry := md5.New()
 	mdtcry.Write([]byte(rpcdataBytes))
 	mdtcry.Write([]byte("&"))
-	mdtcry.Write([]byte(config.RPCSecretKey))
+	mdtcry.Write([]byte("769af463a39f077a0340a189e9c1ec28"))
 	rpcData.Signature = hex.EncodeToString(mdtcry.Sum(nil))
 	rpcData.Data = string(rpcdataBytes)
 	rpcdataBytes, err = json.Marshal(rpcData)

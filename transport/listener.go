@@ -2,8 +2,8 @@ package transport
 
 import (
 	"io"
-	"log"
 	"rpc-go/codec"
+	"rpc-go/config"
 	"strings"
 )
 
@@ -24,20 +24,21 @@ func ReceiveClientData(jmConn *JumeiConn, dataChan chan JumeiTextRPC) (err error
 		size, err = jmConn.Conn.Read(readData)
 		if err != nil {
 			if err != io.EOF {
-				log.Println("not eof error:", err.Error())
-
+				config.Logger.Error("not eof error:", err.Error())
 				dataBox = dataBox[0:0]
-
+				dataBox = nil
+				readData = nil
 				return
 			} else {
-				log.Println("client closed :")
+				config.Logger.Errorf("client %s closed ", jmConn.Conn.RemoteAddr())
 				dataBox = dataBox[0:0]
+				dataBox = nil
+				readData = nil
 				return
 			}
 		}
 		dataBox = append(dataBox, readData[0:size]...)
 		readData = nil
-
 		//读完后，进行解包
 	dealdata:
 		dataString := string(dataBox)
@@ -47,7 +48,7 @@ func ReceiveClientData(jmConn *JumeiConn, dataChan chan JumeiTextRPC) (err error
 			command, data, leftstring, unWrapErr := codec.UnWrapC2SData(dataString)
 			if unWrapErr != nil {
 				// 如果解包出现问题，说明数据已经乱了。则丢掉之前的数据
-				log.Println("解码出错:", dataString, unWrapErr.Error())
+				config.Logger.Errorf("decode %s ,and error %s", dataString, unWrapErr.Error())
 				dataBox = dataBox[0:0]
 				continue
 			}

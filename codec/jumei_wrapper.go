@@ -16,6 +16,8 @@ import (
 //封装client->server 成聚美rpc text格式
 func WrapC2SData(command, data string) string {
 	return fmt.Sprintf("%d\n%s\n%d\n%s\n", len(command), command, len(data), data)
+	// 测试一个
+	//	return fmt.Sprintf("%d\n%s\n%v\n%s\n", len(command), command, "?", data)
 }
 
 //解封client->server
@@ -23,6 +25,7 @@ func UnWrapC2SData(originData string) (command, data, leftString string, err err
 	commandLengthIndex := strings.Index(originData, "\n")
 	if commandLengthIndex <= 0 || commandLengthIndex > len(originData) {
 		err = errors.New("command length is invalidate")
+
 		return
 	}
 	commandLengthStr := originData[:commandLengthIndex]
@@ -38,12 +41,19 @@ func UnWrapC2SData(originData string) (command, data, leftString string, err err
 		return
 	}
 	dataLengthStr := originData[commandLengthIndex+1+commandLength+1 : commandLengthIndex+1+commandLength+1+dataLengthIndex+1+1]
+	var dataLength int
 
-	dataLength, confErr := strconv.Atoi(dataLengthStr)
-	if confErr != nil {
-		err = confErr
+	// if dataLengthStr == '?' {
+	// 	//数据长度, 为 '?' 时读取数据直到出现 "\n".
+	// 	dataLength = strings.Index(originData[commandLengthIndex+1+commandLength+1+dataLengthIndex+1+1+1:], "\n")
+	// 	fmt.Println(originData[commandLengthIndex+1+commandLength+1+dataLengthIndex+1+1+1:], "----", dataLength)
+	// } else {
+	//数据长度为正常的数字
+	dataLength, err = strconv.Atoi(dataLengthStr)
+	if err != nil {
 		return
 	}
+	//	}
 	data = originData[commandLengthIndex+1+commandLength+1+dataLengthIndex+1+2 : commandLengthIndex+1+commandLength+1+dataLengthIndex+1+dataLength+2]
 	// 剩余部分可能是粘包数据，提出来和下一个包进行组合
 	leftString = originData[commandLengthIndex+1+commandLength+1+dataLengthIndex+1+dataLength+3:]
