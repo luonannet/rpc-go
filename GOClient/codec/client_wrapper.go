@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"rpc-go/goclient/config"
 	"strconv"
 	"strings"
 	"time"
@@ -81,8 +82,8 @@ func InitCallRPC(class, method, params string) (result string, err error) {
 	var rpcData RPCData
 	var rpcParam RPCParam
 	rpcParam.Version = "2.0"
-	rpcParam.Method = method
 	rpcParam.Class = class
+	rpcParam.Method = method
 	rpcParam.User = ""
 	rpcParam.Password = ""
 	rpcParam.Timestamp = time.Now().Unix()
@@ -96,7 +97,7 @@ func InitCallRPC(class, method, params string) (result string, err error) {
 	mdtcry := md5.New()
 	mdtcry.Write([]byte(rpcdataBytes))
 	mdtcry.Write([]byte("&"))
-	mdtcry.Write([]byte("769af463a39f077a0340a189e9c1ec28"))
+	mdtcry.Write([]byte(config.RPCEndPointMap.RpcSecretKey))
 	rpcData.Signature = hex.EncodeToString(mdtcry.Sum(nil))
 	rpcData.Data = string(rpcdataBytes)
 	rpcdataBytes, err = json.Marshal(rpcData)

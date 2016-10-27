@@ -12,44 +12,47 @@ import (
 
 type JumeiConn struct {
 	Conn net.Conn
-	JumeiTcpAddr
+	*JumeiEndPoint
 }
-type JumeiTcpAddr struct {
+type JumeiEndPoint struct {
 	*net.TCPAddr
-	config.RPC
+	*config.EndPoint
 }
 
-//ParseURI 解析uri数据
-func ParseURI(rpcApi string) (*JumeiTcpAddr, error) {
-	jta := new(JumeiTcpAddr)
-	rpc := config.RPCConfig.Maps[rpcApi]
+//ParseEndPoint 解析uri数据
+func ParseEndPoint(endpoint string) (*JumeiEndPoint, error) {
+	jta := new(JumeiEndPoint)
+	rpc := config.RPCEndPointMap.Maps[endpoint]
+	if rpc == nil {
+		return nil, errors.New("没有此rpc，请检查配置文件")
+	}
+	jta.EndPoint = rpc
 	uriItems := strings.Split(rpc.URI, "://")
 	if len(uriItems) != 2 {
-		return nil, errors.New("uri格式不对")
+		return nil, errors.New("invalidate uri value")
 	}
 	jta.NetType = uriItems[0]
 	jta.NetURI = uriItems[1]
 	tcpAddr, err := net.ResolveTCPAddr(jta.NetType, jta.NetURI)
 	if err != nil {
-		//		fmt.Fprintf(os.Stderr, " error: %s", err.Error())
 		return nil, err
 	}
 	jta.TCPAddr = tcpAddr
 	return jta, nil
 }
 
-//Call 每次call创建一个连接。
-func (rpcAddr *JumeiTcpAddr) Call(class, method, param string) (response string, err error) {
+//Call JumeiEndPoint 每次call创建一个连接，用完后关闭
+//class 是rpc的类名 或者struct名
+//method是rpc的方法名
+//param 是调用rpc的参数
+func (rpcAddr *JumeiEndPoint) Call(class, method, param string) (response string, err error) {
 	var conn net.Conn
-
 	conn, err = net.DialTCP(rpcAddr.NetType, nil, rpcAddr.TCPAddr)
 	if err != nil {
-		fmt.Println(err.Error())
 		return "", err
 	}
-	dataString, err := codec.InitCallRPC(class, method, param)
+	dataString, err := codec.InitCallRPC(codec.RPC_Client_Prefix+class, method, param)
 	if err != nil {
-		fmt.Println("send err", err.Error())
 		return "", err
 	}
 	receiveChan := make(chan string, 0)

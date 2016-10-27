@@ -1,10 +1,10 @@
-[rpc]
-[rpc.user]
+rpc_secret_key="769af463a39f077a0340a189e9c1ec28"
+[endpoint.user]
 uri="tcp://172.20.4.19:9999" 
 user =""
 secret =""
 compressor ="GZ"
-[rpc.product]
+[endpoint.product]
 uri="tcp://172.20.4.19:9999" 
 user =""
 secret =""
