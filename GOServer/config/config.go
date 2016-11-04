@@ -13,7 +13,6 @@ import (
 
 type RpcServiceConfig struct {
 	ServiceName   string `toml:"service_name"`
-	IP            string `toml:"ip"`
 	Port          string `toml:"port"`
 	MaxConnection int    `toml:"max_connection"` // 最大连接数
 	NetType       string `toml:"net_type"`

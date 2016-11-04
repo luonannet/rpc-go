@@ -2,8 +2,6 @@
 service_name = "acs"
 #net_type: tcp ,tcp4,tcp6
 net_type = "tcp"
-#rpc服务器ip。 目前采用单机
-ip = "172.20.4.19"
 #端口
 port = ":9999"
 #最大连接数

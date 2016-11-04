@@ -21,13 +21,13 @@ type RPCData struct {
 
 //RPCParam rpc的data json数据
 type RPCParam struct {
-	Version   string      `json:"version"`
-	User      string      `json:"user"`
-	Password  string      `json:"password"`
-	Timestamp int64       `json:"timestamp"`
-	Class     string      `json:"class"`
-	Method    string      `json:"method"`
-	Params    interface{} `json:"params"`
+	Version   string `json:"version"`
+	User      string `json:"user"`
+	Password  string `json:"password"`
+	Timestamp int64  `json:"timestamp"`
+	Class     string `json:"class"`
+	Method    string `json:"method"`
+	Params    string `json:"params"`
 }
 
 //S2CData 服务器端发往客户端的数据结构

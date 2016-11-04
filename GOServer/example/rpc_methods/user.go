@@ -3,7 +3,6 @@ package rpc_methods
 import (
 	"fmt"
 	"rpc-go/goserver/config"
-	"rpc-go/goserver/service/register"
 	"rpc-go/goserver/transport"
 )
 
@@ -12,7 +11,7 @@ type Example struct {
 
 func init() {
 	//	register.Reg.RegisterHandler("Example.sayHello", TestExample.SayHello)
-	register.RegisterHandler("Example.RpcTest1Handler", TestExample.RpcTest1Handler)
+	//register.RegisterHandler("Example.RpcTest1Handler", TestExample.RpcTest1Handler)
 
 }
 

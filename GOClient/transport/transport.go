@@ -8,6 +8,7 @@ import (
 	"rpc-go/goclient/codec"
 	"rpc-go/goclient/config"
 	"strings"
+	"time"
 )
 
 type JumeiConn struct {
@@ -24,7 +25,7 @@ func ParseEndPoint(endpoint string) (*JumeiEndPoint, error) {
 	jta := new(JumeiEndPoint)
 	rpc := config.RPCEndPointMap.Maps[endpoint]
 	if rpc == nil {
-		return nil, errors.New("没有此rpc，请检查配置文件")
+		return nil, errors.New("this rpc is not exist .please check config toml ")
 	}
 	jta.EndPoint = rpc
 	uriItems := strings.Split(rpc.URI, "://")
@@ -45,23 +46,32 @@ func ParseEndPoint(endpoint string) (*JumeiEndPoint, error) {
 //class 是rpc的类名 或者struct名
 //method是rpc的方法名
 //param 是调用rpc的参数
-func (rpcAddr *JumeiEndPoint) Call(class, method, param string) (response string, err error) {
+func (rpcAddr *JumeiEndPoint) Call(class, method, param string, compress bool) (response string, err error) {
 	var conn net.Conn
 	conn, err = net.DialTCP(rpcAddr.NetType, nil, rpcAddr.TCPAddr)
 	if err != nil {
 		return "", err
 	}
+	conn.SetDeadline(time.Now().Add(time.Millisecond * config.RPCEndPointMap.TimeOut))
 	dataString, err := codec.InitCallRPC(codec.RPC_Client_Prefix+class, method, param)
 	if err != nil {
 		return "", err
 	}
+	command := "RPC"
+	// 如果需要压缩数据。
+	if compress == true {
+		command = "RPC:GZ"
+		dataString = string(codec.DoZlibCompress([]byte(dataString)))
+	}
 	receiveChan := make(chan string, 0)
-	go receiveData(conn, receiveChan)
-	conn.Write([]byte(codec.WrapC2SData("RPC", dataString)))
+	go receiveData(conn, receiveChan, compress)
+	conn.Write([]byte(codec.WrapC2SData(command, dataString)))
 	response = <-receiveChan
 	closeConn(conn)
 	return response, nil
 }
+
+//关闭连接
 func closeConn(conn net.Conn) {
 	if conn != nil {
 		conn.Close()
@@ -70,7 +80,7 @@ func closeConn(conn net.Conn) {
 }
 
 //receiveData client 一直监听并读取连接中的数据
-func receiveData(conn net.Conn, receivechan chan string) (err error) {
+func receiveData(conn net.Conn, receivechan chan string, compress bool) (err error) {
 	defer closeConn(conn)
 	var dataBox []byte
 	var size int
@@ -89,7 +99,14 @@ func receiveData(conn net.Conn, receivechan chan string) (err error) {
 		dataBox = append(dataBox, readData[0:size]...)
 		//读完后，进行解包
 	dealdata:
-		dataString := string(dataBox)
+		var dataString string
+		if compress == true {
+			//如果是压缩的request ，那么收到的是压缩的response .
+			//解压后再返回
+			dataString = string(codec.DoZlibUnCompress(dataBox))
+		} else {
+			dataString = string(dataBox)
+		}
 		sepNumber := strings.Count(dataString, "\n")
 		if sepNumber >= 2 {
 			data, leftstring, unWrapErr := codec.UnWrapS2CData(dataString)
@@ -108,7 +125,6 @@ func receiveData(conn net.Conn, receivechan chan string) (err error) {
 				leftstring = ""
 				goto dealdata
 			} else {
-
 				receivechan <- data
 				return
 			}

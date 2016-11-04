@@ -17,25 +17,33 @@ func main() {
 	}
 
 	starttime = time.Now()
-	//启动多线程.每个线程循环测试
-	for i := 0; i < 100; i++ {
+	//启动多线程测试.每个线程循环测试
+	threadNum := 500
+	for i := 0; i < threadNum; i++ {
 		go testCallRPC(endPointAddr)
 	}
 	time.Sleep(time.Second * 10)
-	fmt.Printf("耗时:%f秒,调用%d次", time.Now().Sub(starttime).Seconds(), num)
+	fmt.Printf("线程数:%d,调用%d次,共耗时:%f秒", threadNum, successNum, time.Now().Sub(starttime).Seconds())
 }
 
 //用来计算服务器压力测试的开始时间
 var starttime time.Time
 
 //在指定时间内完成的rpc 请求数
-var num int32
+var successNum int32
 
 //testCallRPC 循环压力测试 一个rpc
 func testCallRPC(endPointAddr *transport.JumeiEndPoint) {
-	for {
-		endPointAddr.Call("Example", "RpcTest1Handler", "hello world! 你好 中文")
 
-		atomic.AddInt32(&num, 1)
+	senddata := "hello world! 你好 中文"
+	for {
+		response, err := endPointAddr.Call("Example", "RpcTest1Handler", senddata, false)
+		if err != nil {
+			fmt.Println(err.Error())
+		} else {
+			_ = response
+			//	fmt.Println(response)
+			atomic.AddInt32(&successNum, 1)
+		}
 	}
 }

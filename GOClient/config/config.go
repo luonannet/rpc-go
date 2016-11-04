@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/burntsushi/toml"
 )
@@ -22,6 +23,7 @@ type EndPoint struct {
 //RPCMap rpc的调用信息hash表
 type EndPointMap struct {
 	RpcSecretKey string               `toml:"rpc_secret_key"`
+	TimeOut      time.Duration        `toml:"time_out"`
 	Maps         map[string]*EndPoint `toml:"endpoint"`
 }
 

@@ -24,23 +24,32 @@ func init() {
 var Connections ConnectionsStruct
 
 //Send RPC 服务器发送数据到调用端
-//参数response
-func (jc *JumeiConn) Send(response string) (err error) {
+//response 发送的内容
+//compress 是否压缩内容
+func (jc *JumeiConn) Send(response string, compress bool) (err error) {
 
-	return jc.sendWithStatu(200, response)
+	return jc.sendWithStatu(200, response, compress)
 }
 
 //SendError RPC 服务器发送数据到调用端
-//参数response
-func (jc *JumeiConn) SendError(response string) (err error) {
-	return jc.sendWithStatu(500, response)
+//response 返回的错误内容
+//compress 是否压缩内容
+func (jc *JumeiConn) SendError(response string, compress bool) (err error) {
+	return jc.sendWithStatu(500, response, compress)
 }
 
 //sendWithStatu RPC 服务器发送数据到调用端
 //参数response
-func (jc *JumeiConn) sendWithStatu(statu int, response string) (err error) {
+//compress 是否压缩内容
+func (jc *JumeiConn) sendWithStatu(statu int, response string, compress bool) (err error) {
 	response, err = codec.WrapS2CData(statu, response)
-	jc.Conn.Write([]byte(response))
+	var out []byte
+	if compress == true {
+		out = codec.DoZlibCompress([]byte(response))
+	} else {
+		out = []byte(response)
+	}
+	jc.Conn.Write(out)
 	return
 }
 
@@ -76,4 +85,12 @@ func (jc *JumeiConn) CloseConn() {
 	} else {
 		Connections.Lock.RUnlock()
 	}
+}
+
+// 获取此时连接数
+func GetConnNumber() (result int) {
+	Connections.Lock.RLock()
+	result = len(Connections.ConnMap)
+	Connections.Lock.RUnlock()
+	return result
 }
