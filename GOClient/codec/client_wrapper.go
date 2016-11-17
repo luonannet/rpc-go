@@ -43,15 +43,15 @@ type S2CData struct {
 	Statu int    `json:"statu"`
 }
 
-//封装client->server 成聚美rpc text格式
+//WrapC2SData 封装client->server 成聚美rpc text格式
 func WrapC2SData(command, data string) string {
 	return fmt.Sprintf("%d\n%s\n%d\n%s\n", len(command), command, len(data), data)
 }
 
-//解封server->client
+//UnWrapS2CData 解封server->client
 func UnWrapS2CData(originData string) (data, leftString string, err error) {
 	dataLengthIndex := strings.Index(originData, "\n")
-	if dataLengthIndex <= 0 || dataLengthIndex > len(originData) {
+	if dataLengthIndex < 0 || dataLengthIndex > len(originData) {
 		err = errors.New("dataLengthIndex length is invalidate")
 		return
 	}
@@ -61,7 +61,7 @@ func UnWrapS2CData(originData string) (data, leftString string, err error) {
 		err = confErr
 		return
 	}
-	if dataLength <= 0 || dataLength > len(originData) {
+	if dataLength < 0 || dataLength > len(originData) {
 		err = errors.New("data length is invalidate")
 		return
 	}

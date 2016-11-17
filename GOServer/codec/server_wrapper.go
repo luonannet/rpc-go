@@ -39,7 +39,7 @@ type S2CData struct {
 //解封client->server
 func UnWrapC2SData(originData string) (command, data, leftString string, err error) {
 	commandLengthIndex := strings.Index(originData, "\n")
-	if commandLengthIndex <= 0 || commandLengthIndex > len(originData) {
+	if commandLengthIndex < 0 || commandLengthIndex > len(originData) {
 		err = errors.New("command length is invalidate")
 
 		return
@@ -52,7 +52,7 @@ func UnWrapC2SData(originData string) (command, data, leftString string, err err
 	}
 	command = originData[commandLengthIndex+1 : commandLengthIndex+1+commandLength]
 	dataLengthIndex := strings.Index(originData[commandLengthIndex+1+commandLength+3:], "\n")
-	if dataLengthIndex <= 0 || dataLengthIndex > len(originData) {
+	if dataLengthIndex < 0 || dataLengthIndex > len(originData) {
 		err = errors.New("data length is invalidate")
 		return
 	}

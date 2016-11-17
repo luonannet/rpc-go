@@ -1,16 +1,20 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"rpc-go/goserver/config"
-	"rpc-go/goserver/example/rpc_methods" // 将rpc 的方法进行注册
+	"rpc-go/goserver/example/rpc_methods"
 	"rpc-go/goserver/service"
 	"rpc-go/goserver/service/register"
 )
 
 func main() {
 	//载入配置文件。默认地址在conf/config.toml
-	conf, err := config.LoadConfig("conf/config.toml")
+	var configFile string
+	flag.StringVar(&configFile, "c", "conf/config.toml", " set config file path")
+	flag.Parse()
+	conf, err := config.LoadConfig(configFile)
 	if err != nil {
 		config.Logger.Error("load Config Error:", err.Error())
 		os.Exit(1)

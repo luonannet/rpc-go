@@ -1,11 +1,15 @@
 rpc_secret_key="769af463a39f077a0340a189e9c1ec28"
 #连接超时时间，毫秒。
 time_out=1000
+#测试线程数
+threadnum=100
+#测试时间 秒
+test_time=10
 [endpoint.user]
-uri="tcp://172.20.4.19:9999" 
+uri="tcp://127.0.0.1:4041" 
 user =""
 secret =""
-compressor ="GZ"
+compressor =""
 [endpoint.product]
 uri="tcp://172.20.4.19:9999" 
 user =""

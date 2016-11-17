@@ -11,6 +11,7 @@ import (
 	"rpc-go/goserver/service/register"
 	"rpc-go/goserver/transport"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -59,8 +60,10 @@ func (srvs *JumeiTCPService) Run() {
 			//正常的连接，则开启服务接收
 			go srvs.ServerHandleConn(conn)
 		} else {
-			config.Logger.Error(connErr.Error())
-			os.Exit(1)
+			//有问题的链接
+			config.Logger.Warnf(fmt.Sprintf("connection  err : %s ", connErr.Error()))
+			conn.Close()
+			continue
 		}
 	}
 }
@@ -69,14 +72,14 @@ func (srvs *JumeiTCPService) Run() {
 func listenExitSignal() {
 	sign := make(chan os.Signal, 1)
 	go goExit(sign)
-	signal.Notify(sign, os.Kill, os.Interrupt)
+	signal.Notify(sign, os.Kill, os.Interrupt, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL)
 }
 
 func goExit(sign chan os.Signal) {
 	select {
 	case _ = <-sign:
 		{
-			config.Logger.Critical(" system exit success")
+			config.Logger.Critical(" system exit success ")
 			config.Logger.Flush()
 			config.Logger.Close()
 			os.Exit(0)

@@ -25,6 +25,8 @@ type EndPointMap struct {
 	RpcSecretKey string               `toml:"rpc_secret_key"`
 	TimeOut      time.Duration        `toml:"time_out"`
 	Maps         map[string]*EndPoint `toml:"endpoint"`
+	Threadnum    int                  `toml:"threadnum"`
+	TestTime     int                  `toml:"test_time"`
 }
 
 var RPCEndPointMap EndPointMap
