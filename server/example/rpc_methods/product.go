@@ -2,9 +2,9 @@ package rpc_methods
 
 import (
 	"fmt"
-	"rpc-go/goserver/config"
-	"rpc-go/goserver/service/register"
-	"rpc-go/goserver/transport"
+	"rpc-go/server/config"
+	"rpc-go/server/service/register"
+	"rpc-go/server/transport"
 )
 
 func init() {

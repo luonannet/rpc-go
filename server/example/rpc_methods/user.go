@@ -2,8 +2,8 @@ package rpc_methods
 
 import (
 	"fmt"
-	"rpc-go/goserver/config"
-	"rpc-go/goserver/transport"
+	"rpc-go/server/config"
+	"rpc-go/server/transport"
 )
 
 type Example struct {

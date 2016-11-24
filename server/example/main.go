@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"os"
-	"rpc-go/goserver/config"
-	"rpc-go/goserver/example/rpc_methods"
-	"rpc-go/goserver/service"
-	"rpc-go/goserver/service/register"
+	"rpc-go/server/config"
+	"rpc-go/server/example/rpc_methods"
+	"rpc-go/server/service"
+	"rpc-go/server/service/register"
 )
 
 func main() {

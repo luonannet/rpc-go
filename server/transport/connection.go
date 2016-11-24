@@ -2,7 +2,7 @@ package transport
 
 import (
 	"net"
-	"rpc-go/goserver/codec"
+	"rpc-go/server/codec"
 	"sync"
 )
 

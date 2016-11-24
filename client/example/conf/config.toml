@@ -1,17 +1,17 @@
 rpc_secret_key="769af463a39f077a0340a189e9c1ec28"
 #连接超时时间，毫秒。
-time_out=1000
+time_out=2000
 #测试线程数
-threadnum=100
+threadnum=10
 #测试时间 秒
 test_time=10
-[endpoint.user]
-uri="tcp://127.0.0.1:4041" 
+[endpoint.dev]
+uri="tcp://stdispatcher-acs.jumei.com:4041" 
 user =""
 secret =""
 compressor =""
-[endpoint.product]
-uri="tcp://172.20.4.19:9999" 
+[endpoint.prod]
+uri="tcp://dispatcher-acs.jumei.com:4040" 
 user =""
 secret =""
-compressor ="GZ"
+compressor =""

@@ -6,10 +6,10 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"rpc-go/goserver/codec"
-	"rpc-go/goserver/config"
-	"rpc-go/goserver/service/register"
-	"rpc-go/goserver/transport"
+	"rpc-go/server/codec"
+	"rpc-go/server/config"
+	"rpc-go/server/service/register"
+	"rpc-go/server/transport"
 	"strings"
 	"syscall"
 	"time"
@@ -118,6 +118,7 @@ func (srvs *JumeiTCPService) ServerHandleConn(conn net.Conn) {
 			compress = true
 			fallthrough
 		case "RPC":
+			config.Logger.Info(jumeiTextRPC.Data)
 			rpcData, err := codec.UnwrapRPC(jumeiTextRPC.Data)
 			if err != nil {
 				//解码客户端数据的时候就发生错误
@@ -126,7 +127,12 @@ func (srvs *JumeiTCPService) ServerHandleConn(conn net.Conn) {
 				return
 			}
 			var rpcParam codec.RPCParam
-			json.Unmarshal([]byte(rpcData.Data), &rpcParam)
+			err = json.Unmarshal([]byte(rpcData.Data), &rpcParam)
+			if err != nil {
+				jumeiConn.SendError(err.Error(), compress)
+				config.Logger.Errorf(err.Error())
+				return
+			}
 			// 有些php调用的class 类似Example\a\b 的。先替换成
 			rpcParam.Class = strings.Replace(rpcParam.Class, "\\", "/", -1)
 			callFunc := register.GetHandler(rpcParam.Class + "." + rpcParam.Method)

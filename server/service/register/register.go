@@ -1,7 +1,7 @@
 package register
 
 import (
-	"rpc-go/goserver/transport"
+	"rpc-go/server/transport"
 	"sync"
 )
 

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"rpc-go/goclient/codec"
-	"rpc-go/goclient/config"
+	"rpc-go/client/codec"
+	"rpc-go/client/config"
 	"strings"
 	"time"
 )

@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"rpc-go/goclient/config"
-	"rpc-go/goclient/transport"
+	"rpc-go/client/config"
+	"rpc-go/client/transport"
 	"sync/atomic"
 	"time"
 )
@@ -11,7 +11,7 @@ import (
 func main() {
 	//载入配置文件。默认地址在conf/config.toml
 	config.LoadConfig("conf/config.toml")
-	endPointAddr, err := transport.ParseEndPoint("user")
+	endPointAddr, err := transport.ParseEndPoint("dev")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -41,6 +41,7 @@ func testCallRPC(endPointAddr *transport.JumeiEndPoint) {
 			fmt.Println(err.Error())
 		} else {
 			_ = response
+			fmt.Println(response)
 			atomic.AddInt32(&successNum, 1)
 		}
 	}

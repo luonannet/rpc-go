@@ -2,8 +2,8 @@ package transport
 
 import (
 	"io"
-	"rpc-go/goserver/codec"
-	"rpc-go/goserver/config"
+	"rpc-go/server/codec"
+	"rpc-go/server/config"
 	"strings"
 )
 

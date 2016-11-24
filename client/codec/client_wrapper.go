@@ -10,7 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"rpc-go/goclient/config"
+	"rpc-go/client/config"
 	"strconv"
 	"strings"
 	"time"
