@@ -3,13 +3,13 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"go-rpc/server/codec"
-	"go-rpc/server/config"
-	"go-rpc/server/service/register"
-	"go-rpc/server/transport"
 	"net"
 	"os"
 	"os/signal"
+	"rpc-go/server/codec"
+	"rpc-go/server/config"
+	"rpc-go/server/service/register"
+	"rpc-go/server/transport"
 	"strings"
 	"syscall"
 	"time"
@@ -105,12 +105,12 @@ func (srvs *JumeiTCPService) ServerHandleConn(conn net.Conn) {
 	jumeiConn.Conn = conn
 	transport.AddConnection(jumeiConn)
 	defer srvs.ErrorHandler(jumeiConn)
-	datachan := make(chan transport.JumeiTextRPC, 100)
+	datachan := make(chan *transport.JumeiTextRPC, 100)
 	processTimeout := time.After(time.Millisecond * 2000)
 	jumeiConn.Conn.SetDeadline(time.Now().Add(time.Second * 2))
 	go transport.ReceiveClientData(jumeiConn, datachan)
 
-	var jumeiTextRPC transport.JumeiTextRPC
+	var jumeiTextRPC *transport.JumeiTextRPC
 	select {
 	case <-processTimeout:
 		jumeiConn.SendError("client request data read timeout.", false)
