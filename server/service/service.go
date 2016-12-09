@@ -6,13 +6,16 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
+	"syscall"
+	"time"
+)
+
+import (
 	"rpc-go/server/codec"
 	"rpc-go/server/config"
 	"rpc-go/server/service/register"
 	"rpc-go/server/transport"
-	"strings"
-	"syscall"
-	"time"
 )
 
 //JumeiTCPService 聚美 的tcp rpc 服务
@@ -105,7 +108,7 @@ func (srvs *JumeiTCPService) ServerHandleConn(conn net.Conn) {
 	jumeiConn.Conn = conn
 	transport.AddConnection(jumeiConn)
 	defer srvs.ErrorHandler(jumeiConn)
-	datachan := make(chan transport.JumeiTextRPC, 100)
+	datachan := make(chan *transport.JumeiTextRPC, 100)
 	jumeiConn.Conn.SetDeadline(time.Now().Add(time.Second * 10))
 	go transport.ReceiveClientData(jumeiConn, datachan)
 	for {

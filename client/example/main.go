@@ -36,14 +36,12 @@ var successNum int32
 func testCallRPC(endPointAddr *transport.JumeiEndPoint) {
 	senddata := "hello world! 你好 中文"
 	for {
-		response, err := endPointAddr.Call("acsdispatcher", "serveraddr", senddata, false)
+		response, err := endPointAddr.Call("Example", "SayHello", senddata, false)
 		if err != nil {
 			fmt.Println(err.Error())
 		} else {
-			_ = response 
-	 fmt.Println(response) 
-time.Sleep(time.Microsecond*100)
-	
+			_ = response
+
 			atomic.AddInt32(&successNum, 1)
 		}
 	}

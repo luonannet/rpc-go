@@ -4,14 +4,14 @@ time_out=2000
 #测试线程数
 threadnum=10
 #测试时间 秒
-test_time=1000000
+test_time=30
 [endpoint.dev]
-uri="tcp://stdispatcher-acs.jumei.com:4040" 
+uri="tcp://127.0.0.1:9999" 
 user =""
 secret =""
 compressor =""
 [endpoint.prod]
-uri="tcp://dispatcher-acs.jumei.com:4041" 
+uri="tcp://127.0.0.1:9999" 
 user =""
 secret =""
 compressor =""

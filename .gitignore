@@ -1,5 +1,5 @@
 *.exe
 *.prof
-/server/example/client
+/client/example/client
 /server/example/server
 *.log

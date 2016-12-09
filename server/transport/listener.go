@@ -1,9 +1,9 @@
 package transport
 
 import (
-	"io"
 	"rpc-go/server/codec"
 	"rpc-go/server/config"
+	"io"
 	"strings"
 )
 
@@ -15,7 +15,7 @@ type JumeiTextRPC struct {
 }
 
 // 一直监听并读取连接中的数据
-func ReceiveClientData(jmConn *JumeiConn, dataChan chan JumeiTextRPC) (err error) {
+func ReceiveClientData(jmConn *JumeiConn, dataChan chan *JumeiTextRPC) (err error) {
 	var dataBox []byte
 
 	var size int
@@ -25,17 +25,13 @@ func ReceiveClientData(jmConn *JumeiConn, dataChan chan JumeiTextRPC) (err error
 		if err != nil {
 			if err != io.EOF {
 				config.Logger.Error("not eof error:", err.Error())
-				dataBox = dataBox[0:0]
-				dataBox = nil
-				readData = nil
-				return
 			} else {
 				config.Logger.Errorf("client %s closed ", jmConn.Conn.RemoteAddr())
-				dataBox = dataBox[0:0]
-				dataBox = nil
-				readData = nil
-				return
 			}
+			// dataBox = dataBox[0:0]
+			dataBox = nil
+			readData = nil
+			return
 		}
 		dataBox = append(dataBox, readData[0:size]...)
 		readData = nil
@@ -52,11 +48,7 @@ func ReceiveClientData(jmConn *JumeiConn, dataChan chan JumeiTextRPC) (err error
 				dataBox = dataBox[0:0]
 				continue
 			}
-			var jumeiTextRpc JumeiTextRPC
-			jumeiTextRpc.Command = command
-			jumeiTextRpc.Data = data
-			dataChan <- jumeiTextRpc
-
+			dataChan <- &JumeiTextRPC{Command: command, Data: data}
 			dataBox = dataBox[0:0]
 			// 如果还有剩余数据，那么继续处理
 			if len(leftstring) > 0 {
