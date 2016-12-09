@@ -3,13 +3,13 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"go-rpc/server/codec"
+	"go-rpc/server/config"
+	"go-rpc/server/service/register"
+	"go-rpc/server/transport"
 	"net"
 	"os"
 	"os/signal"
-	"rpc-go/server/codec"
-	"rpc-go/server/config"
-	"rpc-go/server/service/register"
-	"rpc-go/server/transport"
 	"strings"
 	"syscall"
 	"time"
@@ -106,64 +106,72 @@ func (srvs *JumeiTCPService) ServerHandleConn(conn net.Conn) {
 	transport.AddConnection(jumeiConn)
 	defer srvs.ErrorHandler(jumeiConn)
 	datachan := make(chan transport.JumeiTextRPC, 100)
-	jumeiConn.Conn.SetDeadline(time.Now().Add(time.Second * 10))
+	processTimeout := time.After(time.Millisecond * 2000)
+	jumeiConn.Conn.SetDeadline(time.Now().Add(time.Second * 2))
 	go transport.ReceiveClientData(jumeiConn, datachan)
-	for {
-		jumeiTextRPC := <-datachan
-		compress := false
-		switch jumeiTextRPC.Command {
-		case "RPC:GZ":
-			//数据采用了压缩.
-			jumeiTextRPC.Data = string(codec.DoZlibUnCompress([]byte(jumeiTextRPC.Data)))
-			compress = true
-			fallthrough
-		case "RPC":
-			config.Logger.Info(jumeiTextRPC.Data)
-			rpcData, err := codec.UnwrapRPC(jumeiTextRPC.Data)
-			if err != nil {
-				//解码客户端数据的时候就发生错误
-				err = jumeiConn.SendError(err.Error(), compress)
-				config.Logger.Errorf("decode in jumeiTextRPC err: %s", err.Error())
-				return
-			}
-			var rpcParam codec.RPCParam
-			err = json.Unmarshal([]byte(rpcData.Data), &rpcParam)
-			if err != nil {
-				jumeiConn.SendError(err.Error(), compress)
-				config.Logger.Errorf(err.Error())
-				return
-			}
-			// 有些php调用的class 类似Example\a\b 的。先替换成
-			rpcParam.Class = strings.Replace(rpcParam.Class, "\\", "/", -1)
-			callFunc := register.GetHandler(rpcParam.Class + "." + rpcParam.Method)
-			if callFunc == nil {
-				notExist := fmt.Sprintf("RPC Method:%s not exist", rpcParam.Class+"."+rpcParam.Method)
-				jumeiConn.SendError(notExist, compress)
-				config.Logger.Errorf(notExist)
-				return
-			}
 
-			response, apiErr := callFunc(jumeiConn, rpcParam.Params)
-			//将rpc执行结果返回到客户端.如果有错误 那么把错误返回。
-			if apiErr != nil {
-				config.Logger.Errorf("rpc execute err: %s", apiErr.Error())
-				err = jumeiConn.SendError(apiErr.Error(), compress)
-				if err != nil {
-					config.Logger.Errorf("response err: %s", err.Error())
-				}
-			} else {
-				//返回的结果是否压缩是根据request是否压缩来决定，request压缩则response也压缩，
-				err = jumeiConn.Send(response, compress)
-				if err != nil {
-					config.Logger.Errorf("response err: %s", err.Error())
-				}
-			}
-			//因为是短连接，发送完response 后即刻返回并关闭连接
-			return
+	var jumeiTextRPC transport.JumeiTextRPC
+	select {
+	case <-processTimeout:
+		jumeiConn.SendError("client request data read timeout.", false)
+		return
+	case jumeiTextRPC = <-datachan:
+	}
 
-		default:
-			config.Logger.Errorf("command must be 'RPC' or 'RPC:GZ' ,now is %s .", jumeiTextRPC.Command)
+	compress := false
+	switch jumeiTextRPC.Command {
+	case "RPC:GZ":
+		//数据采用了压缩.
+		jumeiTextRPC.Data = string(codec.DoZlibUnCompress([]byte(jumeiTextRPC.Data)))
+		compress = true
+		fallthrough
+	case "RPC":
+		config.Logger.Info(jumeiTextRPC.Data)
+		rpcData, err := codec.UnwrapRPC(jumeiTextRPC.Data)
+		if err != nil {
+			//解码客户端数据的时候就发生错误
+			err = jumeiConn.SendError(err.Error(), compress)
+			config.Logger.Errorf("decode in jumeiTextRPC err: %s", err.Error())
 			return
 		}
+		var rpcParam codec.RPCParam
+		err = json.Unmarshal([]byte(rpcData.Data), &rpcParam)
+		if err != nil {
+			jumeiConn.SendError(err.Error(), compress)
+			config.Logger.Errorf(err.Error())
+			return
+		}
+		// 有些php调用的class 类似Example\a\b 的。先替换成
+		rpcParam.Class = strings.Replace(rpcParam.Class, "\\", "/", -1)
+		callFunc := register.GetHandler(rpcParam.Class + "." + rpcParam.Method)
+		if callFunc == nil {
+			notExist := fmt.Sprintf("RPC Method:%s not exist", rpcParam.Class+"."+rpcParam.Method)
+			jumeiConn.SendError(notExist, compress)
+			config.Logger.Errorf(notExist)
+			return
+		}
+
+		response, apiErr := callFunc(jumeiConn, rpcParam.Params)
+		//将rpc执行结果返回到客户端.如果有错误 那么把错误返回。
+		if apiErr != nil {
+			config.Logger.Errorf("rpc execute err: %s", apiErr.Error())
+			err = jumeiConn.SendError(apiErr.Error(), compress)
+			if err != nil {
+				config.Logger.Errorf("response err: %s", err.Error())
+			}
+		} else {
+			//返回的结果是否压缩是根据request是否压缩来决定，request压缩则response也压缩，
+			err = jumeiConn.Send(response, compress)
+			if err != nil {
+				config.Logger.Errorf("response err: %s", err.Error())
+			}
+		}
+		//因为是短连接，发送完response 后即刻返回并关闭连接
+		return
+
+	default:
+		config.Logger.Errorf("command must be 'RPC' or 'RPC:GZ' ,now is %s .", jumeiTextRPC.Command)
+		return
 	}
+
 }
