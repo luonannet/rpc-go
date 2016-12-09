@@ -11,7 +11,7 @@ import (
 func main() {
 	//载入配置文件。默认地址在conf/config.toml
 	config.LoadConfig("conf/config.toml")
-	endPointAddr, err := transport.ParseEndPoint("dev")
+	endPointAddr, err := transport.ParseEndPoint("prod")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -40,8 +40,10 @@ func testCallRPC(endPointAddr *transport.JumeiEndPoint) {
 		if err != nil {
 			fmt.Println(err.Error())
 		} else {
-			_ = response
-			fmt.Println(response)
+			_ = response 
+	 fmt.Println(response) 
+time.Sleep(time.Microsecond*100)
+	
 			atomic.AddInt32(&successNum, 1)
 		}
 	}

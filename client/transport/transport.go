@@ -82,6 +82,7 @@ func closeConn(conn net.Conn) {
 //receiveData client 一直监听并读取连接中的数据
 func receiveData(conn net.Conn, receivechan chan string, compress bool) (err error) {
 	defer closeConn(conn)
+
 	var dataBox []byte
 	var size int
 	for {
